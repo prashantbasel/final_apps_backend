@@ -12,7 +12,4 @@ router.get('/all', bookingController.getAllBookingItems);
 // Route to delete item from booking
 router.delete('/delete/:id', bookingController.deleteBookingItem);
 
-
-
-
 module.exports = router;
