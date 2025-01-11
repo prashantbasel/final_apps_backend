@@ -429,28 +429,37 @@ const getFriendRequests = async (req, res) => {
   }
 };
 const getFriends = async (req, res) => {
-  try {
-      // Find the logged-in user and populate their friends list
-      const user = await userModel.findById(req.user.id).populate('friends', 'firstName email phone avatar');
-      
-      if (!user) {
-          return res.status(404).json({
-              success: false,
-              message: "User not found!",
-          });
-      }
+    try {
+        const user = await userModel
+            .findById(req.user.id)
+            .populate('friends', 'firstName email phone');
 
-      res.status(200).json({
-          success: true,
-          friends: user.friends,
-      });
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({
-          success: false,
-          message: "Internal server error!",
-      });
-  }
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found!",
+            });
+        }
+
+        // Transform friends data to include `name` property
+        const friends = user.friends.map(friend => ({
+            id: friend._id,
+            name: friend.firstName, // Map `firstName` to `name`
+            email: friend.email,
+            phone: friend.phone,
+        }));
+
+        res.status(200).json({
+            success: true,
+            friends,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error!",
+        });
+    }
 };
 
 const acceptFriendRequest = async (req, res) => {
@@ -546,7 +555,54 @@ module.exports = {
   removeFriend,
 };
 
-   
+const Team = require('../models/teamModel');
+
+// Fetch team assignments
+const getTeamAssignments = async (req, res) => {
+    try {
+        const userId = req.user.id; // Logged-in user ID from auth middleware
+
+        let team = await Team.findOne({ userId });
+        if (!team) {
+            // If no team exists, create an empty team
+            team = new Team({ userId, goalKeeper: [], defender: [], winger: [], forward: [] });
+            await team.save();
+        }
+
+        res.status(200).json(team);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// Save/update team assignments
+const saveTeamAssignments = async (req, res) => {
+    try {
+        const userId = req.user.id; // Logged-in user ID from auth middleware
+        const { goalKeeper, defender, winger, forward } = req.body;
+
+        let team = await Team.findOne({ userId });
+
+        if (!team) {
+            team = new Team({ userId, goalKeeper, defender, winger, forward });
+        } else {
+            team.goalKeeper = goalKeeper;
+            team.defender = defender;
+            team.winger = winger;
+            team.forward = forward;
+        }
+
+        await team.save();
+        res.status(200).json({ message: 'Team assignments saved successfully!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+ 
 
 module.exports = {
     createUser,
@@ -563,7 +619,9 @@ module.exports = {
     getFriends,
     acceptFriendRequest,
     rejectFriendRequest,
-    removeFriend
+    removeFriend,
+    getTeamAssignments,
+    saveTeamAssignments
     
 
 };

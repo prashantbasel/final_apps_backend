@@ -41,5 +41,12 @@ router.post("/reject-friend-request", authGuard, userController.rejectFriendRequ
 
 router.post('/remove-friend', authGuard, userController.removeFriend);
 
+// Fetch team assignments
+router.get('/team/assignments', authGuard, userController.getTeamAssignments);
+
+// Save/update team assignments
+router.post('/team/assignments', authGuard, userController.saveTeamAssignments);
+
+
 // exporting the router 
 module.exports = router
