@@ -45,21 +45,36 @@ exports.addToBooking = async (req, res) => {
 
 // Get all booking items
 exports.getAllBookingItems = async (req, res) => {
+    try {
+        const bookingItems = await Booking.find({}).populate('userId'); // Replace 'Booking' with your model if needed
+        res.status(200).json({ bookings: bookingItems });
+    } catch (error) {
+        console.error('Error fetching booking items:', error.message);
+        res.status(500).json({ error: 'Failed to fetch booking items' });
+    }
+};
+
+
+// Delete item from booking
+const mongoose = require('mongoose');
+
+exports.deleteBookingItem = async (req, res) => {
   try {
-    const bookingItems = await Booking.find({}).populate('userId');
-    res.status(200).json({ bookings: bookingItems });
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid booking ID format' });
+    }
+
+    const deletedItem = await Booking.findByIdAndDelete(id);
+    if (!deletedItem) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    res.json({ message: 'Booking deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Delete item from booking
-exports.deleteBookingItem = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Booking.findByIdAndDelete(id);
-    res.json({ message: 'Item deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+
+

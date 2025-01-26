@@ -9,7 +9,6 @@ router.post('/add', authGuard, bookingController.addToBooking);
 // Route to get all booking items
 router.get('/all', bookingController.getAllBookingItems);
 
-// Route to delete item from booking
 router.delete('/delete/:id', bookingController.deleteBookingItem);
 
 module.exports = router;

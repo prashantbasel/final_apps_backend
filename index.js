@@ -5,6 +5,7 @@ const connectDatabase = require('./database/database');
 const dotenv = require('dotenv')
 const cors = require('cors')
 const acceptFormData = require('express-fileupload')
+const bookingRoutes = require('./routes/bookingRoutes');
 
 //Creating an express app 
 const app = express();
@@ -45,7 +46,7 @@ app.use('/api/user', require('./routes/userRoutes'))
 app.use('/api/product', require('./routes/productRoutes'))
 app.use('/api/booking', require('./routes/bookingRoutes'))
 app.use('/api/contact', require('./routes/contactRoutes'))
-
+app.use('/booking', bookingRoutes);
 
 // http://localhost:5000/api/user/create
 
